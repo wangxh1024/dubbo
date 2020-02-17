@@ -76,8 +76,14 @@ public class ExtensionLoader<T> {
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
 
+    /**
+     * 存储type对应的ExtensionLoader
+     */
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<>();
 
+    /**
+     * 存储扩展类对象主要是不包含含有Adaptive注解和含有构造函数是type的实体类
+     */
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<>();
 
     private final Class<?> type;
@@ -89,6 +95,10 @@ public class ExtensionLoader<T> {
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<>();
 
     private final Map<String, Object> cachedActivates = new ConcurrentHashMap<>();
+
+    /**
+     * 存储spi对应的value对应的实现对象
+     */
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<>();
     private final Holder<Object> cachedAdaptiveInstance = new Holder<>();
     private volatile Class<?> cachedAdaptiveClass = null;
@@ -517,6 +527,8 @@ public class ExtensionLoader<T> {
 
     @SuppressWarnings("unchecked")
     private T createExtension(String name) {
+
+        // 该方法会初始化 cachedNames cachedWrapperClasses cachedActivates
         Class<?> clazz = getExtensionClasses().get(name);
         if (clazz == null) {
             throw findException(name);
@@ -527,7 +539,10 @@ public class ExtensionLoader<T> {
                 EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.newInstance());
                 instance = (T) EXTENSION_INSTANCES.get(clazz);
             }
+            // 对实现类进行IOC注入
             injectExtension(instance);
+
+            // 实现Dubbo的AOP， 将instance对象进行包装
             Set<Class<?>> wrapperClasses = cachedWrapperClasses;
             if (CollectionUtils.isNotEmpty(wrapperClasses)) {
                 for (Class<?> wrapperClass : wrapperClasses) {
@@ -553,11 +568,13 @@ public class ExtensionLoader<T> {
                             continue;
                         }
                         Class<?> pt = method.getParameterTypes()[0];
+                        // 检验参数是否为原始类型
                         if (ReflectUtils.isPrimitives(pt)) {
                             continue;
                         }
                         try {
                             String property = getSetterProperty(method);
+                            // 获取需要注入的对象
                             Object object = objectFactory.getExtension(pt, property);
                             if (object != null) {
                                 method.invoke(instance, object);
@@ -714,6 +731,7 @@ public class ExtensionLoader<T> {
     }
 
     private void loadClass(Map<String, Class<?>> extensionClasses, java.net.URL resourceURL, Class<?> clazz, String name) throws NoSuchMethodException {
+        // 校验class是否是type的子类
         if (!type.isAssignableFrom(clazz)) {
             throw new IllegalStateException("Error occurred when loading extension class (interface: " +
                     type + ", class line: " + clazz.getName() + "), class "
@@ -848,6 +866,7 @@ public class ExtensionLoader<T> {
         if (cachedAdaptiveClass != null) {
             return cachedAdaptiveClass;
         }
+        // 走到这一步，说明该接口没有对应的Adaptive代理类
         return cachedAdaptiveClass = createAdaptiveExtensionClass();
     }
 

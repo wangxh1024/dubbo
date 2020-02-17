@@ -134,6 +134,11 @@ public final class ReflectUtils {
         return isPrimitive(cls);
     }
 
+    /**
+     * cls.isPrimitive()是检验对象是否是原始类型
+     * @param cls
+     * @return
+     */
     public static boolean isPrimitive(Class<?> cls) {
         return cls.isPrimitive() || cls == String.class || cls == Boolean.class || cls == Character.class
                 || Number.class.isAssignableFrom(cls) || Date.class.isAssignableFrom(cls);
