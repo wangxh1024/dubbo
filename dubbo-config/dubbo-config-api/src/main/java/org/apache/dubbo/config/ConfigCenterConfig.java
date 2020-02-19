@@ -90,6 +90,10 @@ public class ConfigCenterConfig extends AbstractConfig {
     public ConfigCenterConfig() {
     }
 
+    /**
+     * 取出配置中心的配置，并将其封装到URl中
+     * @return
+     */
     public URL toUrl() {
         Map<String, String> map = new HashMap<>();
         appendParameters(map, this);

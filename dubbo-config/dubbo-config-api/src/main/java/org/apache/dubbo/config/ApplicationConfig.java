@@ -409,6 +409,9 @@ public class ApplicationConfig extends AbstractConfig {
 
     @Override
     public void refresh() {
+        /**
+         * Environment
+         */
         super.refresh();
         appendEnvironmentProperties();
     }

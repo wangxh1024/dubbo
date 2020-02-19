@@ -397,6 +397,10 @@ public abstract class AbstractConfig implements Serializable {
         }).collect(Collectors.toSet());
     }
 
+    /**
+     * 获取setName方法的属性名name
+     * 如果setName方法中的参数有Parameter注解，则取注解的key作为name
+     */
     private static String extractPropertyName(Class<?> clazz, Method setter) throws Exception {
         String propertyName = setter.getName().substring("set".length());
         Method getter = null;
@@ -548,7 +552,21 @@ public abstract class AbstractConfig implements Serializable {
      */
     public void refresh() {
         try {
+            /**
+             * Environment单例 将全局变量存入该单例中
+             * ----private Map<String, PropertiesConfiguration> propertiesConfigs = new ConcurrentHashMap<>();
+             * ----private Map<String, SystemConfiguration> systemConfigs = new ConcurrentHashMap<>();
+             * ----private Map<String, EnvironmentConfiguration> environmentConfigs = new ConcurrentHashMap<>();
+             * ----private Map<String, InmemoryConfiguration> externalConfigs = new ConcurrentHashMap<>();
+             * ----private Map<String, InmemoryConfiguration> appExternalConfigs = new ConcurrentHashMap<>();
+             * CompositeConfiguration
+             *     List<Configuration> configList.add(configuration)；
+             */
             CompositeConfiguration compositeConfiguration = Environment.getInstance().getConfiguration(getPrefix(), getId());
+            /**
+             * ConfigConfigurationAdapter
+             * ----this.metaData = config.getMetaData()
+             */
             Configuration config = new ConfigConfigurationAdapter(this);
             if (Environment.getInstance().isConfigCenterFirst()) {
                 // The sequence would be: SystemConfiguration -> AppExternalConfiguration -> ExternalConfiguration -> AbstractConfig -> PropertiesConfiguration
@@ -563,6 +581,13 @@ public abstract class AbstractConfig implements Serializable {
             for (Method method : methods) {
                 if (MethodUtils.isSetter(method)) {
                     try {
+                        /**
+                         * extractPropertyName(getClass(), method)
+                         * ----获取setName方法的属性名name
+                         * ----如果setName方法中的参数有Parameter注解，则取注解的key作为name
+                         * compositeConfiguration.getString
+                         * ----遍历List<Configuration> configList所有的配置，找到则break，获取对应的value
+                         */
                         String value = StringUtils.trim(compositeConfiguration.getString(extractPropertyName(getClass(), method)));
                         // isTypeMatch() is called to avoid duplicate and incorrect update, for example, we have two 'setGeneric' methods in ReferenceConfig.
                         if (StringUtils.isNotEmpty(value) && ClassUtils.isTypeMatch(method.getParameterTypes()[0], value)) {

@@ -25,11 +25,47 @@ import org.apache.dubbo.demo.DemoService;
 
 public class Application {
     public static void main(String[] args) throws Exception {
+        /**
+         * new ServiceConfig<>()
+         * ----private static final Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getAdaptiveExtension()
+         * ----private static final ProxyFactory PROXY_FACTORY = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
+         * ----private static final ScheduledExecutorService DELAY_EXPORT_EXECUTOR = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("DubboServiceDelayExporter", true));
+         */
         ServiceConfig<DemoServiceImpl> service = new ServiceConfig<>();
+        /**
+         * new ApplicationConfig("dubbo-demo-api-provider")
+         * ----this.name = dubbo-demo-api-provider;
+         * ----this.id = dubbo-demo-api-provider;
+         * service.setApplication
+         * ----this.application = application;
+         * ----ConfigManager:this.application = application; 配置管理器
+         *
+         */
         service.setApplication(new ApplicationConfig("dubbo-demo-api-provider"));
-        service.setRegistry(new RegistryConfig("zookeeper://127.0.0.1:2181"));
+        /**
+         * new RegistryConfig
+         * ----this.address = address;
+         * ----org.apache.dubbo.config.AbstractConfig#id=zookeeper
+         * ----org.apache.dubbo.config.RegistryConfig#protocol=zookeeper
+         * ----org.apache.dubbo.config.RegistryConfig#port=2181
+         * service.setRegistry
+         * ----List<RegistryConfig> registries.add(registry)
+         * ----org.apache.dubbo.config.context.ConfigManager#registries.put(registry.id, registry)
+         */
+        service.setRegistry(new RegistryConfig("zookeeper://192.168.145.100:2181"));
+        /**
+         *  this.interfaceClass = interfaceClass;
+         *  this.interfaceName = interfaceClass.getName();
+         *  org.apache.dubbo.config.AbstractConfig#id = interfaceClass.getName();
+         */
         service.setInterface(DemoService.class);
+        /**
+         * org.apache.dubbo.config.ServiceConfig#ref=new DemoServiceImpl()
+         */
         service.setRef(new DemoServiceImpl());
+        /**
+         *
+         */
         service.export();
         System.in.read();
     }

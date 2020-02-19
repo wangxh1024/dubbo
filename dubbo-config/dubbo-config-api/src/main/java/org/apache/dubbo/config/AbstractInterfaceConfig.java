@@ -194,6 +194,13 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
      * Check whether the registry config is exists, and then conversion it to {@link RegistryConfig}
      */
     protected void checkRegistry() {
+        /**
+         * 如果registries为空
+         * 1，System.getProperty(key)
+         * 2，System.getProperty(CommonConstants.DUBBO_PROPERTIES_KEY);'dubbo.properties.file';
+         * 3, System.getenv(CommonConstants.DUBBO_PROPERTIES_KEY);
+         * 4, path = CommonConstants.DEFAULT_DUBBO_PROPERTIES; 'dubbo.properties'
+         */
         loadRegistriesFromBackwardConfig();
 
         convertRegistryIdsToRegistries();
@@ -308,6 +315,14 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         }
     }
 
+    /**
+     * 1,通过SPI获取动态配置工厂
+     * 2,通过工厂模式获取动态配置
+     * ----setZookeeperTransporter(ZookeeperTransporter zookeeperTransporter)  通过dubbo的IOC进行注入
+     * 3,把动态配置保存到Environment中
+     * @param url
+     * @return
+     */
     private DynamicConfiguration getDynamicConfiguration(URL url) {
         DynamicConfigurationFactory factory = ExtensionLoader
                 .getExtensionLoader(DynamicConfigurationFactory.class)
@@ -594,6 +609,13 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     private void loadRegistriesFromBackwardConfig() {
         // for backward compatibility
         // -Ddubbo.registry.address is now deprecated.
+        /**
+         * 如果registries为空
+         * 1，System.getProperty(key)
+         * 2，System.getProperty(CommonConstants.DUBBO_PROPERTIES_KEY);'dubbo.properties.file';
+         * 3, System.getenv(CommonConstants.DUBBO_PROPERTIES_KEY);
+         * 4, path = CommonConstants.DEFAULT_DUBBO_PROPERTIES; 'dubbo.properties'
+         */
         if (registries == null || registries.isEmpty()) {
             String address = ConfigUtils.getProperty("dubbo.registry.address");
             if (address != null && address.length() > 0) {

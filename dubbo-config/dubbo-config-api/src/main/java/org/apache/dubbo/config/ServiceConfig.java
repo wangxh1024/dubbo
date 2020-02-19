@@ -293,12 +293,38 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         // Use default configs defined explicitly on global configs
         completeCompoundConfigs();
         // Config Center should always being started first.
+        /**
+         *  ConfigManager.getInstance().refreshAll();
+         *  ----getApplication().ifPresent(ApplicationConfig::refresh);
+         *  ----getMonitor().ifPresent(MonitorConfig::refresh);
+         *  ----getModule().ifPresent(ModuleConfig::refresh);
+         *  ----getProtocols().values().forEach(ProtocolConfig::refresh);
+         *  ----getRegistries().values().forEach(RegistryConfig::refresh);
+         *  ----getProviders().values().forEach(ProviderConfig::refresh);
+         *  ----getConsumers().values().forEach(ConsumerConfig::refresh);
+         */
         startConfigCenter();
+        /**
+         * setProvider(ProviderConfig provider)
+         * ----this.provider = provider;
+         * ----ConfigManager.getInstance().addProvider(provider);
+         */
         checkDefault();
+        /**
+         *  setProtocols(List<? extends ProtocolConfig> protocols)
+         *  ----ConfigManager.getInstance().addProtocols((List<ProtocolConfig>) protocols);
+         *  ----this.protocols = (List<ProtocolConfig>) protocols;
+         *  ProtocolConfig protocolConfig = new ProtocolConfig()
+         *  ----refresh()
+         *  --------this.setName(DUBBO_VERSION_KEY)   DUBBO_VERSION_KEY=dubbo
+         *  ------------this.name = name;
+         *  ------------this.updateIdIfAbsent(name);
+
+         */
         checkProtocol();
         checkApplication();
         // if protocol is not injvm checkRegistry
-        if (!isOnlyInJvm()) {
+         if (!isOnlyInJvm()) {
             checkRegistry();
         }
         this.refresh();

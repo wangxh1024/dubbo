@@ -44,7 +44,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.DEFAULT_KEY;
  * Maybe we can consider open to end user in the following version by providing a fluent style builder.
  *
  * <pre>{@code
- *  public void class DubboBuilder() {
+ *  public void class DubboBuilder() {`
  *
  *      public static DubboBuilder create() {
  *          return new DubboBuilder();
